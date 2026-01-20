@@ -3,7 +3,7 @@
 ## Setting up on a new machine
 
 ```bash
-git clone git@github.com:brianlovin/claude-config.git ~/Developer/claude-config
+git clone git@github.com:lovincyrus/claude-config.git ~/Developer/claude-config
 cd ~/Developer/claude-config
 ./install.sh
 ```

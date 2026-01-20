@@ -5,7 +5,7 @@ My [Claude Code](https://docs.anthropic.com/en/docs/claude-code) configuration -
 ## Quick start
 
 ```bash
-git clone https://github.com/brianlovin/claude-config.git
+git clone https://github.com/lovincyrus/claude-config.git
 cd claude-config
 ./install.sh
 ```
@@ -112,4 +112,3 @@ claude-config/
 ## See also
 
 - [Claude Code docs](https://docs.anthropic.com/en/docs/claude-code)
-- [My dotfiles](https://github.com/brianlovin/dotfiles) - Shell, git, SSH config
