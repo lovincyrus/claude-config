@@ -191,6 +191,14 @@ show_status() {
     fi
     echo ""
 
+    echo -e "${BOLD}Commands:${RESET}"
+    if [ -d "$HOME/.claude/commands" ] && ls "$HOME/.claude/commands"/*.md &>/dev/null; then
+        show_file_status "commands"
+    else
+        echo "  (none)"
+    fi
+    echo ""
+
     echo "Legend: ✓ synced | ○ local only | ⚠ conflict | → external"
     echo ""
     echo "Usage:"
@@ -205,7 +213,7 @@ show_status() {
     echo "Options:"
     echo "  -n, --dry-run                   Show what would be done"
     echo ""
-    echo "Types: skill, agent, rule"
+    echo "Types: skill, agent, rule, command"
 }
 
 add_skill() {
@@ -581,23 +589,25 @@ case "${1:-}" in
     add)
         type="${2:-}"
         name="${3:-}"
-        [ -z "$type" ] || [ -z "$name" ] && { echo "Usage: ./sync.sh add <type> <name>"; echo "Types: skill, agent, rule"; exit 1; }
+        [ -z "$type" ] || [ -z "$name" ] && { echo "Usage: ./sync.sh add <type> <name>"; echo "Types: skill, agent, rule, command"; exit 1; }
         case "$type" in
-            skill)  add_skill "$name" ;;
-            agent)  add_file "agents" "$name" ;;
-            rule)   add_file "rules" "$name" ;;
-            *)      echo "Unknown type: $type (use: skill, agent, rule)"; exit 1 ;;
+            skill)    add_skill "$name" ;;
+            agent)    add_file "agents" "$name" ;;
+            rule)     add_file "rules" "$name" ;;
+            command)  add_file "commands" "$name" ;;
+            *)        echo "Unknown type: $type (use: skill, agent, rule, command)"; exit 1 ;;
         esac
         ;;
     remove)
         type="${2:-}"
         name="${3:-}"
-        [ -z "$type" ] || [ -z "$name" ] && { echo "Usage: ./sync.sh remove <type> <name>"; echo "Types: skill, agent, rule"; exit 1; }
+        [ -z "$type" ] || [ -z "$name" ] && { echo "Usage: ./sync.sh remove <type> <name>"; echo "Types: skill, agent, rule, command"; exit 1; }
         case "$type" in
-            skill)  remove_skill "$name" ;;
-            agent)  remove_file "agents" "$name" ;;
-            rule)   remove_file "rules" "$name" ;;
-            *)      echo "Unknown type: $type (use: skill, agent, rule)"; exit 1 ;;
+            skill)    remove_skill "$name" ;;
+            agent)    remove_file "agents" "$name" ;;
+            rule)     remove_file "rules" "$name" ;;
+            command)  remove_file "commands" "$name" ;;
+            *)        echo "Unknown type: $type (use: skill, agent, rule, command)"; exit 1 ;;
         esac
         ;;
     pull)

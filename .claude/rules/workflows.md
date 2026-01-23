@@ -34,7 +34,7 @@ Use `--force` to automatically use repo versions (still creates backups).
 ./sync.sh
 ```
 
-Shows status grouped by type (Skills, Agents, Rules):
+Shows status grouped by type (Skills, Agents, Rules, Commands):
 
 - `✓` synced (symlinked to this repo)
 - `○` local only (not in repo)
@@ -44,9 +44,10 @@ Shows status grouped by type (Skills, Agents, Rules):
 ## Adding items to sync across machines
 
 ```bash
-./sync.sh add skill <name>   # Add a skill directory
-./sync.sh add agent <name>   # Add an agent file (without .md extension)
-./sync.sh add rule <name>    # Add a rule file (without .md extension)
+./sync.sh add skill <name>     # Add a skill directory
+./sync.sh add agent <name>     # Add an agent file (without .md extension)
+./sync.sh add rule <name>      # Add a rule file (without .md extension)
+./sync.sh add command <name>   # Add a command file (without .md extension)
 ./sync.sh push
 ```
 
@@ -60,6 +61,7 @@ Skills are validated before adding - must have SKILL.md with `name` and `descrip
 ./sync.sh remove skill <name>
 ./sync.sh remove agent <name>
 ./sync.sh remove rule <name>
+./sync.sh remove command <name>
 ./sync.sh push
 ```
 
@@ -112,6 +114,7 @@ Use this for work-specific or experimental items.
 
 ```
 ~/.claude/
+├── commands/        # Slash command markdown files
 ├── skills/          # Skill directories (each has SKILL.md)
 ├── agents/          # Subagent markdown files
 ├── rules/           # Rule markdown files

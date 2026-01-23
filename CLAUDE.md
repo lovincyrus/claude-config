@@ -18,7 +18,7 @@ Personal Claude Code settings, skills, agents, and rules, synced across machines
 bats tests/               # Run tests
 ```
 
-Types: `skill`, `agent`, `rule`
+Types: `skill`, `agent`, `rule`, `command`
 
 ## Testing
 
@@ -26,10 +26,20 @@ Tests use Bats. Run `bats tests/` to execute all tests. Tests run in isolated te
 
 See [.claude/rules/testing.md](.claude/rules/testing.md) for testing conventions.
 
+## Slash Commands
+
+Commands are invoked in Claude Code with `/<name>`:
+
+| Command | Description |
+|---------|-------------|
+| `/commit` | Commit current changes with an auto-generated message |
+| `/clean-copy` | Reimplement current branch with a clean, narrative-quality commit history |
+
 ## Key Files
 
 - `install.sh` - Creates symlinks from ~/.claude to this repo
 - `sync.sh` - Manages syncing items between local and repo
+- `commands/` - Slash command definitions
 - `tests/` - Bats test suite
 
 For detailed workflows, see [.claude/rules/workflows.md](.claude/rules/workflows.md).

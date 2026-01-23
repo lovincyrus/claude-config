@@ -337,6 +337,41 @@ main() {
         done
     fi
 
+    # Commands (file symlinks per command)
+    if [ -d "$CONFIG_DIR/commands" ] && ls "$CONFIG_DIR/commands"/*.md &>/dev/null; then
+        mkdir -p ~/.claude/commands
+        for cmd in "$CONFIG_DIR/commands"/*.md; do
+            [ -f "$cmd" ] || continue
+            cmd_name=$(basename "$cmd")
+            local dest=~/.claude/commands/"$cmd_name"
+
+            if $DRY_RUN; then
+                if has_conflict "$dest"; then
+                    dry_run_msg "Would backup and replace commands/$cmd_name"
+                else
+                    dry_run_msg "Would link commands/$cmd_name"
+                fi
+            else
+                if has_conflict "$dest"; then
+                    [ -z "$backup_path" ] && backup_path=$(create_backup)
+                    if handle_conflict "$cmd" "$dest" "$backup_path" "commands/$cmd_name"; then
+                        backed_up_items+=("commands/$cmd_name")
+                        rm -rf "$dest"
+                        ln -sf "$cmd" "$dest"
+                        echo -e "${GREEN}✓${RESET} commands/$cmd_name (replaced, backup saved)"
+                        has_changes=true
+                    else
+                        echo -e "${YELLOW}○${RESET} commands/$cmd_name (kept local)"
+                    fi
+                else
+                    ln -sf "$cmd" "$dest"
+                    echo -e "${GREEN}✓${RESET} commands/$cmd_name"
+                    has_changes=true
+                fi
+            fi
+        done
+    fi
+
     echo ""
 
     if $DRY_RUN; then
