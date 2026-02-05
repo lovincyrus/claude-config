@@ -267,9 +267,41 @@ main() {
         done
     fi
 
-    # Agents (file symlinks per agent)
-    if [ -d "$CONFIG_DIR/agents" ] && ls "$CONFIG_DIR/agents"/*.md &>/dev/null; then
+    # Agents (directory symlinks per agent, with fallback to file symlinks)
+    if [ -d "$CONFIG_DIR/agents" ] && [ -n "$(ls -A "$CONFIG_DIR/agents" 2>/dev/null)" ]; then
         mkdir -p ~/.claude/agents
+        # Handle agent directories
+        for agent in "$CONFIG_DIR/agents"/*/; do
+            [ -d "$agent" ] || continue
+            agent_name=$(basename "$agent")
+            local dest=~/.claude/agents/"$agent_name"
+
+            if $DRY_RUN; then
+                if has_conflict "$dest"; then
+                    dry_run_msg "Would backup and replace agents/$agent_name"
+                else
+                    dry_run_msg "Would link agents/$agent_name"
+                fi
+            else
+                if has_conflict "$dest"; then
+                    [ -z "$backup_path" ] && backup_path=$(create_backup)
+                    if handle_conflict "$agent" "$dest" "$backup_path" "agents/$agent_name"; then
+                        backed_up_items+=("agents/$agent_name")
+                        rm -rf "$dest"
+                        ln -sfn "$agent" "$dest"
+                        echo -e "${GREEN}✓${RESET} agents/$agent_name (replaced, backup saved)"
+                        has_changes=true
+                    else
+                        echo -e "${YELLOW}○${RESET} agents/$agent_name (kept local)"
+                    fi
+                else
+                    ln -sfn "$agent" "$dest"
+                    echo -e "${GREEN}✓${RESET} agents/$agent_name"
+                    has_changes=true
+                fi
+            fi
+        done
+        # Handle agent .md files
         for agent in "$CONFIG_DIR/agents"/*.md; do
             [ -f "$agent" ] || continue
             agent_name=$(basename "$agent")
@@ -337,9 +369,10 @@ main() {
         done
     fi
 
-    # Commands (file symlinks per command)
-    if [ -d "$CONFIG_DIR/commands" ] && ls "$CONFIG_DIR/commands"/*.md &>/dev/null; then
+    # Commands (file symlinks per command, with subdirectory support)
+    if [ -d "$CONFIG_DIR/commands" ] && [ -n "$(ls -A "$CONFIG_DIR/commands" 2>/dev/null)" ]; then
         mkdir -p ~/.claude/commands
+        # Handle top-level command .md files
         for cmd in "$CONFIG_DIR/commands"/*.md; do
             [ -f "$cmd" ] || continue
             cmd_name=$(basename "$cmd")
@@ -369,6 +402,43 @@ main() {
                     has_changes=true
                 fi
             fi
+        done
+        # Handle command subdirectories (e.g. commands/workflows/)
+        for cmd_dir in "$CONFIG_DIR/commands"/*/; do
+            [ -d "$cmd_dir" ] || continue
+            dir_name=$(basename "$cmd_dir")
+            mkdir -p ~/.claude/commands/"$dir_name"
+            for cmd in "$cmd_dir"*.md; do
+                [ -f "$cmd" ] || continue
+                cmd_name=$(basename "$cmd")
+                local dest=~/.claude/commands/"$dir_name"/"$cmd_name"
+                local label="commands/$dir_name/$cmd_name"
+
+                if $DRY_RUN; then
+                    if has_conflict "$dest"; then
+                        dry_run_msg "Would backup and replace $label"
+                    else
+                        dry_run_msg "Would link $label"
+                    fi
+                else
+                    if has_conflict "$dest"; then
+                        [ -z "$backup_path" ] && backup_path=$(create_backup)
+                        if handle_conflict "$cmd" "$dest" "$backup_path" "$label"; then
+                            backed_up_items+=("$label")
+                            rm -rf "$dest"
+                            ln -sf "$cmd" "$dest"
+                            echo -e "${GREEN}✓${RESET} $label (replaced, backup saved)"
+                            has_changes=true
+                        else
+                            echo -e "${YELLOW}○${RESET} $label (kept local)"
+                        fi
+                    else
+                        ln -sf "$cmd" "$dest"
+                        echo -e "${GREEN}✓${RESET} $label"
+                        has_changes=true
+                    fi
+                fi
+            done
         done
     fi
 
